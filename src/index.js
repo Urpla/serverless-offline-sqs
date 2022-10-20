@@ -189,7 +189,7 @@ class ServerlessOfflineSQS {
                                         QueueUrl
                                     },
                                     () => cb2()))
-                            );
+                            ).then(() => resolve(next()));
                           }
 
                           return resolve(next());
