@@ -62,7 +62,7 @@ class ServerlessOfflineSQS {
     return new SQS(awsConfig);
   }
 
-  getQueueName(queueEvent) {
+  getQueueName(queueEvent, functionName) {
     if (typeof queueEvent === 'string') return extractQueueNameFromARN(queueEvent);
     if (typeof queueEvent.arn === 'string') return extractQueueNameFromARN(queueEvent.arn);
     if (typeof queueEvent.queueName === 'string') return queueEvent.queueName;
@@ -81,6 +81,10 @@ class ServerlessOfflineSQS {
         return this.service.resources.Resources[ResourceName].Properties.QueueName;
     }
 
+    if(!!functionName) {
+      return functionName;
+    }
+
     throw new Error(
       `QueueName not found. See https://github.com/godu/serverless/tree/master/packages/serverless-offline-sqs#functions`
     );
@@ -89,7 +93,7 @@ class ServerlessOfflineSQS {
   eventHandler(queueEvent, functionName, messages, cb) {
     if (!messages) return cb();
 
-    const streamName = this.getQueueName(queueEvent);
+    const streamName = this.getQueueName(queueEvent, functionName);
     this.serverless.cli.log(`${streamName} (λ: ${functionName})`);
 
     const {location = '.'} = getConfig(this.service, 'serverless-offline');
@@ -151,7 +155,7 @@ class ServerlessOfflineSQS {
 
   createQueueReadable(functionName, queueEvent) {
     const client = this.getClient();
-    const queueName = this.getQueueName(queueEvent);
+    const queueName = this.getQueueName(queueEvent, functionName);
 
     this.serverless.cli.log(`${queueName}`);
 
